@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\ExceptionHandlerService;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,5 +20,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->dontFlash([
+            'current_password',
+            'password',
+            'password_confirmation',
+        ]);
+
+        // Single exception handler that routes to service
+        $exceptions->render(function (Throwable $e) {
+            return app(ExceptionHandlerService::class)->handle($e);
+        });
     })->create();
