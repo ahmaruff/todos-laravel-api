@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Todo extends Model
 {
-    use HasUlids;
-
     public const STATUS_PENDING = 'pending';
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROGRESS = 'in_progress';
