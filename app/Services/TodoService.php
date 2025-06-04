@@ -3,6 +3,7 @@ namespace App\Services;
 
 use App\Commands\ModelPaginationCommand;
 use App\Models\Todo;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -27,11 +28,13 @@ class TodoService
         }
 
         if (!empty($filters['start'])) {
-            $query->whereDate('due_date', '>=', $filters['start']);
+            $start = Carbon::parse($filters['start'])->startOfDay()->utc();
+            $query->whereDate('due_date', '>=', $start);
         }
 
         if (!empty($filters['end'])) {
-            $query->whereDate('due_date', '<=', $filters['end']);
+            $end = Carbon::parse($filters['end'])->endOfDay()->utc();
+            $query->whereDate('due_date', '<=', $end);
         }
 
         if (!empty($filters['min'])) {
