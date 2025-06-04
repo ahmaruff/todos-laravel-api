@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Commands\ResponseJsonCommand;
 use App\Http\Controllers\Controller;
+use App\Models\Todo;
 use App\Services\TodoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class TodoController extends Controller
 {
@@ -62,7 +67,26 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'title' => ['required', 'string'],
+            'assignee' => ['sometimes', 'nullable', 'string'],
+            'due_date' => ['required', 'date', 'after_or_equal:today'],
+            'time_tracked' => ['sometimes','nullable', 'integer'],
+            'status' => ['sometimes', 'nullable', 'string',Rule::in(Todo::$statusList)],
+            'priority' => ['required', 'string',Rule::in(Todo::$priorityList)],
+        ];
+
+        $validator = Validator::make($request->json()->all(), $rules);
+
+        if($validator->fails()){
+            throw new ValidationException($validator);
+        }
+
+        $validated = $validator->validated();
+
+        $todo = $this->todoService->save($validated);
+
+        return ResponseJsonCommand::responseSuccess("success save todo", ['todo' => $todo], Response::HTTP_CREATED);
     }
 
     /**
@@ -70,23 +94,37 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $todo = $this->todoService->find($id);
+        return ResponseJsonCommand::responseSuccess("success get todo", ['todo' => $todo]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
-        //
+        $rules = [
+            'title' => ['required', 'string'],
+            'assignee' => ['sometimes', 'nullable', 'string'],
+            'due_date' => ['required', 'date', 'after_or_equal:today'],
+            'time_tracked' => ['sometimes','nullable', 'integer'],
+            'status' => ['sometimes', 'nullable', 'string',Rule::in(Todo::$statusList)],
+            'priority' => ['required', 'string',Rule::in(Todo::$priorityList)],
+        ];
+
+        $validator = Validator::make($request->json()->all(), $rules);
+
+        if($validator->fails()){
+            throw new ValidationException($validator);
+        }
+
+        $validated = $validator->validated();
+        $validated['id'] = $id;
+
+        $todo = $this->todoService->save($validated);
+
+        return ResponseJsonCommand::responseSuccess("success save todo", ['todo' => $todo], Response::HTTP_OK);
     }
 
     /**
@@ -94,6 +132,8 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $result = $this->todoService->delete($id);
+
+        return ResponseJsonCommand::responseSuccess("success delete todo");
     }
 }
