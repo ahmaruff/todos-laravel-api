@@ -30,6 +30,11 @@ class LogController extends Controller
             ->values();
 
         $data = [
+            'available_filters' => [
+                'date' => 'get logs by date (yyyy-mm-dd). default: today',
+                'limit' => 'limit log being parsed from the last line. default: 10',
+                'sort' => 'sorting log response. default: asc',
+            ],
             'logs' => $logs
         ];
 
