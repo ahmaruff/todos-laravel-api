@@ -2,34 +2,36 @@
 namespace App\Commands;
 
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class ModelPaginationCommand
 {
-    public static function execute(LengthAwarePaginator $paginator, array $filters = [], ?string $baseUrl = null): array
+    public static function execute(Builder $query, int $perPage = 10, int $page = 1, array $filters = [], ?string $baseUrl = null): array
     {
         $baseUrl = $baseUrl ?? url()->current();
+        $paginator = $query->latest()->paginate($perPage, ['*'], 'page', $page);
 
-        $queryParams = collect($filters)->filter()->all();
+        $queryParams = array_filter($filters);
 
-        $currentPage = $paginator->currentPage();
-        $lastPage = $paginator->lastPage();
-
-        $prevPageUrl = $currentPage > 1
-            ? $baseUrl . '?' . http_build_query(array_merge($queryParams, ['page' => $currentPage - 1]))
+        $prevPageUrl = $paginator->currentPage() > 1
+            ? $baseUrl . '?' . http_build_query(array_merge($queryParams, ['page' => $page - 1]))
             : null;
 
-        $nextPageUrl = $currentPage < $lastPage
-            ? $baseUrl . '?' . http_build_query(array_merge($queryParams, ['page' => $currentPage + 1]))
+        $nextPageUrl = $paginator->currentPage() < $paginator->lastPage()
+            ? $baseUrl . '?' . http_build_query(array_merge($queryParams, ['page' => $page + 1]))
             : null;
 
         return [
-            'current_page' => $currentPage,
-            'total_page' => $lastPage,
-            'per_page' => $paginator->perPage(),
-            'last_page' => $lastPage,
-            'previous_page_url' => $prevPageUrl,
-            'next_page_url' => $nextPageUrl,
-            'total' => $paginator->total(),
+            'items' => $paginator->items(),
+            'pagination' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total_pages' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'previous_page_url' => $prevPageUrl,
+                'next_page_url' => $nextPageUrl,
+                'total' => $paginator->total(),
+            ]
         ];
     }
 }

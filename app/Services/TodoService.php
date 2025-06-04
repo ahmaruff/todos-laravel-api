@@ -17,7 +17,10 @@ class TodoService
     {
         $query = Todo::query();
 
-        $perPage = $filters['per_page'] ?? 10;
+        $page = (int) ($filters['page'] ?? 1);
+        $perPage = (int) ($filters['per_page'] ?? 10);
+
+        unset($filters['page'], $filters['per_page']);
 
         if (!empty($filters['title'])) {
             $query->where('title', 'like', '%' . $filters['title'] . '%');
@@ -69,10 +72,11 @@ class TodoService
 
 
         if($paginate) {
-            $paginator = $query->latest()->paginate($perPage);
+            $result = ModelPaginationCommand::execute($query, $perPage, $page, $filters,  null);
+
             return [
-                'todos' => $paginator->items(),
-                'pagination' => ModelPaginationCommand::execute($paginator, $filters, $baseUrl = null),
+                'todos' => $result['items'],
+                'pagination' => $result['pagination']
             ];
         }
 
