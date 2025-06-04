@@ -15,7 +15,7 @@ Route::get('logs', [\App\Http\Controllers\LogController::class, 'index'])->name(
 Route::group([
     'prefix' => 'todos',
     'name' => 'todos.',
-]. function() {
+], function() {
     Route::get('/', [\App\Http\Controllers\Api\TodoController::class, 'index'])->name('index');
     Route::post('/', [\App\Http\Controllers\Api\TodoController::class, 'store'])->name('store');
     Route::get('/{id}', [\App\Http\Controllers\Api\TodoController::class, 'show'])->name('show');
