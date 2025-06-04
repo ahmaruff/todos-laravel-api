@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Commands\ModelPaginationCommand;
 use App\Models\Todo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -12,13 +13,76 @@ class TodoService
 {
     public function __construct(private LogService $logService) {}
 
-    /**
-     * Save or update a todo item.
-     *
-     * @param array<string, mixed> $data
-     * @return \App\Models\Todo
-     * @throws \Illuminate\Validation\ValidationException
-     */
+    public function list(array $filters = [], bool $paginate = false)
+    {
+        $query = Todo::query();
+
+        $perPage = $filters['per_page'] ?? 10;
+
+        if (!empty($filters['title'])) {
+            $query->where('title', 'like', '%' . $filters['title'] . '%');
+        }
+
+        if (!empty($filters['start'])) {
+            $query->whereDate('due_date', '>=', $filters['start']);
+        }
+
+        if (!empty($filters['end'])) {
+            $query->whereDate('due_date', '<=', $filters['end']);
+        }
+
+        if (!empty($filters['min'])) {
+            $query->whereDate('time_tracked', '>=', $filters['min']);
+        }
+
+        if (!empty($filters['max'])) {
+            $query->whereDate('time_tracked', '<=', $filters['max']);
+        }
+
+
+        if (!empty($filters['assignee'])) {
+            $assignees = array_map('trim', explode(',', $filters['assignee']));
+            $query->where(function ($q) use ($assignees) {
+                foreach ($assignees as $assignee) {
+                    $q->orWhere(function ($q2) use ($assignee) {
+                        $q2->where('assignee', $assignee)
+                        ->orWhere('assignee', 'LIKE', "$assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee,%");
+                    });
+                }
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $status = trim($filters['status']);
+            $query->where('status', $status);
+        }
+
+        // Filter by priority
+        if (!empty($filters['priority'])) {
+            $priority = trim($filters['priority']);
+            $query->where('priority', $priority);
+        }
+
+
+        if($paginate) {
+            $paginator = $query->latest()->paginate($perPage);
+            return [
+                'todos' => $paginator->items(),
+                'pagination' => ModelPaginationCommand::execute($paginator, $filters, $baseUrl = null),
+            ];
+        }
+
+        $todos = $query->latest()->get();
+        return [
+            'todos' => $todos,
+            'pagination' => null
+        ];
+    }
+
     public function save($data)
     {
         $this->logService->start()->task();
@@ -69,6 +133,34 @@ class TodoService
         } catch (\Throwable $e) {
             DB::rollBack();
 
+            throw $e;
+        }
+    }
+
+    public function find($id): Todo
+    {
+        $todo = Todo::findOrFail($id);
+        return $todo;
+    }
+
+    public function delete($id): void
+    {
+        $this->logService->start()->task();
+        DB::beginTransaction();
+
+        try {
+            $todo = Todo::findOrFail($id);
+            $todo->delete();
+
+            DB::commit();
+
+            $this->logService->status(LogService::STATUS_SUCCESS)
+                ->detectContext(request())
+                ->message("Deleted todo: $id")
+                ->response(['id' => $id])
+                ->save();
+        } catch (\Throwable $e) {
+            DB::rollBack();
             throw $e;
         }
     }
