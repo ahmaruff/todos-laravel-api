@@ -8,4 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class Todo extends Model
 {
     use HasUlids;
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_OPEN = 'open';
+    public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_COMPLETED = 'completed';
+
+    public $statusList = [
+        self::STATUS_PENDING,
+        self::STATUS_OPEN,
+        self::STATUS_IN_PROGRESS,
+        self::STATUS_COMPLETED
+    ];
+
+    public const PRIORITY_LOW = 'low';
+    public const PRIORITY_MEDIUM = 'medium';
+    public const PRIORITY_HIGH = 'high';
+
+    public $priorityList = [
+        self::PRIORITY_LOW,
+        self::PRIORITY_MEDIUM,
+        self::PRIORITY_HIGH
+    ];
 }
