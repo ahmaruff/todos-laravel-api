@@ -11,3 +11,14 @@ Route::get('/', function () {
 });
 
 Route::get('logs', [\App\Http\Controllers\LogController::class, 'index'])->name('logs');
+
+Route::group([
+    'prefix' => 'todos',
+    'name' => 'todos.',
+]. function() {
+    Route::get('/', [\App\Http\Controllers\Api\TodoController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\Api\TodoController::class, 'store'])->name('store');
+    Route::get('/{id}', [\App\Http\Controllers\Api\TodoController::class, 'show'])->name('show');
+    Route::put('/{id}', [\App\Http\Controllers\Api\TodoController::class, 'update'])->name('update');
+    Route::delete('/{id}', [\App\Http\Controllers\Api\TodoController::class, 'destroy'])->name('destroy');
+});
