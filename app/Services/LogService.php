@@ -61,7 +61,7 @@ class LogService
             ],
 
             'app_version' => config('app.version', null),
-            'app_target' => config('app.target', null),
+            'app_env' => config('app.env', null),
             'app_service' => config('app.service', null),
         ];
 
@@ -201,7 +201,7 @@ class LogService
         }
 
         // Log using the level
-        $level = $this->logData['meta']['level'];
+        $level = $this->logData['meta']['level'] ?? 'info';
         Log::channel('activity')->$level($this->logData['meta']['message'], $this->logData);
 
         return true;
