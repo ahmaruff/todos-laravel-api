@@ -33,7 +33,12 @@ class RequestLoggingMiddleware
 
     private function shouldLogRequest(Request $request): bool
     {
-        // Always log API requests
+
+        // Always log API reques// Skip logging for specific URLs
+        if ($request->is('api') || $request->is('api/logs') || $request->is('api/logs/*')) {
+            return false;
+        }
+
         if ($request->is('api/*')) {
             return true;
         }
@@ -48,8 +53,23 @@ class RequestLoggingMiddleware
 
     private function isImportantWebRequest(Request $request): bool
     {
-        // Log authentication/security related
-        if ($request->is('login*') || $request->is('register*') || $request->is('logout*') || $request->is('up')) {
+        // Skip routine GET requests to reduce noise
+        if ($request->method() === 'GET') {
+            return false;
+        }
+
+        // Skip static assets
+        if ($this->isStaticAsset($request)) {
+            return false;
+        }
+
+        $match = [
+            "login*",
+            "register*",
+            "logout*"
+        ];
+
+        if ($request->is($match)) {
             return true;
         }
 
@@ -60,16 +80,6 @@ class RequestLoggingMiddleware
 
         // Log errors (this will be handled in logRequestCycle)
         // We'll check the response status there
-
-        // Skip static assets
-        if ($this->isStaticAsset($request)) {
-            return false;
-        }
-
-        // Skip routine GET requests to reduce noise
-        if ($request->method() === 'GET') {
-            return false;
-        }
 
         return true;
     }
@@ -120,7 +130,11 @@ class RequestLoggingMiddleware
     private function shouldLogResponseData(Request $request, Response $response): bool
     {
         $statusCode = $response->getStatusCode();
-        $isApiRequest = $request->is('api/*');
+        $isApiRequest = $request->is('api/*') || $request->expectsJson();
+
+        if($request->is('api/logs') || $request->is('api/logs/*')) {
+            return false;
+        }
 
         // Always log response for errors
         if ($statusCode >= 400) {
