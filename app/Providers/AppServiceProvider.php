@@ -14,14 +14,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(LogService::class, function ($app) {
+        $this->app->bind(LogService::class, function ($app) {
             return new LogService(
                 agentService: $app->make(AgentService::class)
             );
         });
 
-        $this->app->singleton(ExceptionHandlerService::class, function($app) {
-            return new ExceptionHandlerService($app->make(LogService::class));
+        $this->app->bind(ExceptionHandlerService::class, function ($app) {
+            return new ExceptionHandlerService(
+                logService: $app->make(LogService::class)
+            );
         });
     }
 
