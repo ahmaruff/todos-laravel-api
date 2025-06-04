@@ -188,7 +188,7 @@ class LogService
         }
 
         // Include user agent data if available
-        if ($this->request && config('logging.include_agent', true)) {
+        if ($this->request) {
             $agent = $this->agentService->getAgent($this->request);
             $this->logData['request']['agent'] = $agent;
         }
