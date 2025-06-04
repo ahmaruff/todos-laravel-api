@@ -13,6 +13,19 @@ class LogService
     protected $startTime;
     protected $agentService;
 
+    public const STATUS_SUCCESS = 'success';
+    public const STATUS_FAIL = 'fail';
+    public const STATUS_ERROR = 'error';
+
+    public const LEVEL_DEBUG = 'debug';
+    public const LEVEL_INFO = 'info';
+    public const LEVEL_NOTICE = 'notice';
+    public const LEVEL_WARNING = 'warning';
+    public const LEVEL_ERROR = 'error';
+    public const LEVEL_CRITICAL = 'critical';
+    public const LEVEL_ALERT = 'alert';
+    public const LEVEL_EMERGENCY = 'emergency';
+
     public function __construct(AgentService $agentService)
     {
         $this->logData = [
