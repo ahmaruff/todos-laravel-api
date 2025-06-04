@@ -21,7 +21,7 @@ class TodoService
      */
     public function save($data)
     {
-        $this->logService->start();
+        $this->logService->start()->task();
 
         $rules = [
             'id' => ['sometimes', 'nullable', 'exists:todos,id'],
@@ -58,9 +58,9 @@ class TodoService
 
             $this->logService->status(LogService::STATUS_SUCCESS)
                 ->code(Response::HTTP_OK)
+                ->detectContext(request())
                 ->level(LogService::LEVEL_INFO)
                 ->message("Successfully saved todo")
-                ->task()
                 ->response(['todo' => $todo])
                 ->save();
 
