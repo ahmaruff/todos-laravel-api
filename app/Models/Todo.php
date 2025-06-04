@@ -14,7 +14,7 @@ class Todo extends Model
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_COMPLETED = 'completed';
 
-    public $statusList = [
+    public static $statusList = [
         self::STATUS_PENDING,
         self::STATUS_OPEN,
         self::STATUS_IN_PROGRESS,
@@ -25,9 +25,18 @@ class Todo extends Model
     public const PRIORITY_MEDIUM = 'medium';
     public const PRIORITY_HIGH = 'high';
 
-    public $priorityList = [
+    public static $priorityList = [
         self::PRIORITY_LOW,
         self::PRIORITY_MEDIUM,
         self::PRIORITY_HIGH
     ];
+
+     protected $fillable = [
+        'title',
+        'assignee',
+        'due_date',
+        'time_tracked',
+        'status',
+        'priority'
+     ];
 }
