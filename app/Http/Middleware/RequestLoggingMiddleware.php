@@ -6,6 +6,7 @@ use App\Services\LogService;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Str;
 
 class RequestLoggingMiddleware
 {
@@ -18,6 +19,10 @@ class RequestLoggingMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        $requestId = (string) Str::uuid();
+        app()->instance('request_id', $requestId);
+        $request->headers->set('X-Request-ID', $requestId);
+
         $shouldLog = $this->shouldLogRequest($request);
 
         if (!$shouldLog) {
@@ -99,19 +104,26 @@ class RequestLoggingMiddleware
 
         // Build log entry using LogService
         $logEntry = $this->logService
-            ->request($request)
+            ->detectContext($request)
             ->task($isApiRequest ? 'api_request_cycle' : 'web_request_cycle')
             ->code($statusCode)
             ->message($this->buildMessage($request, $response));
 
         // Set appropriate level and status
+        $level = LogService::LEVEL_INFO;
+        $status = LogService::STATUS_SUCCESS;
+
         if ($statusCode >= 500) {
-            $logEntry->level('error')->status('error');
+            $level = LogService::LEVEL_ERROR;
+            $status = LogService::STATUS_ERROR;
+
         } elseif ($statusCode >= 400) {
-            $logEntry->level('warning')->status('fail');
-        } else {
-            $logEntry->level('info')->status('success');
+            $level = LogService::LEVEL_WARNING;
+            $status = LogService::STATUS_FAIL;
         }
+
+        $logEntry->level($level)->status($status);
+
 
         // Add response data conditionally (different rules for web vs API)
         if ($this->shouldLogResponseData($request, $response)) {

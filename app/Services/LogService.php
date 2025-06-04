@@ -5,6 +5,9 @@ namespace App\Services;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Str;
 
 class LogService
 {
@@ -28,10 +31,13 @@ class LogService
 
     public function __construct(AgentService $agentService)
     {
+        $requestId = App::bound('request_id') ? App::make('request_id') : Str::uuid();
+
         $this->logData = [
             'meta' => [
-                'status' => 'success',
-                'level' => 'info',
+                'request_id' => $requestId,
+                'status' => self::STATUS_SUCCESS,
+                'level' => self::LEVEL_INFO,
                 'code' => 200,
                 'task' => 'process_data',
                 'message' => 'Data processing completed',
@@ -83,7 +89,7 @@ class LogService
 
     public function status(string $status): self
     {
-        $this->logData['meta']['status'] = $status;
+        $this->logData['meta']['status'] = strtolower($status);
         return $this;
     }
 
@@ -111,27 +117,32 @@ class LogService
         return $this;
     }
 
-    private function getDefaultTaskName(): ?string
+    public function cli(): self
     {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+        $this->startTime = microtime(true);
 
-        // Skip LogService itself and the direct caller
-        if (!isset($backtrace[2])) {
-            return null;
+        $this->logData['request'] = [
+            'method' => 'CLI',
+            'url' => implode(' ', $_SERVER['argv'] ?? []),
+            'ip' => gethostbyname(gethostname()),
+            'data' => null,
+            'agent' => [
+                'browser' => php_uname('s'),
+                'platform' => PHP_OS,
+                'device' => 'cli',
+            ],
+        ];
+
+        $user = Auth::user();
+        if ($user) {
+            $this->logData['user']['id'] = $user->id;
+            $this->logData['user']['email'] = $user->email;
         }
 
-        $caller = $backtrace[2];
-
-        if (isset($caller['class'])) {
-            $class = class_basename($caller['class']);
-            $method = $caller['function'] ?? 'unknown';
-            return "{$class}_{$method}";
-        }
-
-        return 'unkown_task';
+        return $this;
     }
 
-    public function request($request): self
+    public function request(Request $request): self
     {
         $this->request = $request;
         $this->startTime = microtime(true);
@@ -204,6 +215,8 @@ class LogService
         if ($this->request) {
             $agent = $this->agentService->getAgent($this->request);
             $this->logData['request']['agent'] = $agent;
+        } elseif (app()->runningInConsole()) {
+            $this->cli();
         }
 
         // Clean up empty nested objects
@@ -215,7 +228,12 @@ class LogService
 
         // Log using the level
         $level = $this->logData['meta']['level'] ?? 'info';
-        Log::channel('activity')->$level($this->logData['meta']['message'], $this->logData);
+
+        if (method_exists(Log::channel('activity'), $level)) {
+            Log::channel('activity')->$level($this->logData['meta']['message'], $this->logData);
+        } else {
+            Log::channel('activity')->debug('[Invalid level fallback] ' . $this->logData['meta']['message'], $this->logData);
+        }
 
         return true;
     }
@@ -248,5 +266,38 @@ class LogService
         }
 
         return $data;
+    }
+
+    private function getDefaultTaskName(): ?string
+    {
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+
+        // Skip LogService itself and the direct caller
+        if (!isset($backtrace[2])) {
+            return null;
+        }
+
+        $caller = $backtrace[2];
+
+        if (isset($caller['class'])) {
+            $class = class_basename($caller['class']);
+            $method = $caller['function'] ?? 'unknown';
+            return "{$class}_{$method}";
+        }
+
+        return 'unknown_task';
+    }
+
+    public function detectContext($request = null): self
+    {
+        if ($request && $request instanceof Request) {
+            return $this->request($request);
+        }
+
+        if (app()->runningInConsole()) {
+            return $this->cli();
+        }
+
+        return $this;
     }
 }
