@@ -1,61 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Todo List APIs Backend (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A RESTful API backend built with **Laravel**, designed to manage todo items with support for:
+- Creating todos
+- Exporting filtered data to Excel
+- Generating chart-ready summary data
 
-## About Laravel
+## Project Goals
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The primary objective of this project was to implement all features described in the original specification document, which can be found in the [`SPEC.md`](./SPEC.md) file.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+In addition to fulfilling the functional requirements, this implementation aims to demonstrate:
+- Adherence to modern development practices
+- Understanding of API design standards
+- Consideration of long-term maintainability and scalability
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Some aspects of the implementation differ slightly from the specification. These variations are intentional and based on common industry patterns and practical trade-offs.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Design Decisions and Implementation Notes
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+While the original specification included certain implementation suggestions — such as using database ENUM types and returning unstructured JSON responses — alternative approaches have been adopted in this project. The following sections outline these choices and the rationale behind them.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 1. Avoiding ENUM Types in the Database
 
-## Laravel Sponsors
+> **Original suggestion**: Use ENUM types for fields like `status` and `priority`  
+> **Implementation choice**: Enforce allowed values at the application layer
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+#### Rationale:
+Using ENUM types directly in the database schema can lead to complications when modifying or extending values in production environments. Instead, validation is performed at the Laravel request and model level using constants and form requests.
 
-### Premium Partners
+This approach offers:
+- Greater flexibility when introducing new statuses or priorities
+- Easier migration between versions without altering the schema
+- A clearer separation between business logic and data storage concerns
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+It also aligns with how many large-scale applications handle enumerated values, especially when those values may evolve over time.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 2. Consistent API Response Format (JSend Standard)
 
-## Code of Conduct
+> **Original suggestion**: Return raw created object or error messages  
+> **Implementation choice**: Responses follow the [JSend](https://github.com/omniti-labs/jsend)  specification
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Rationale:
+Standardizing response structures improves predictability for clients consuming the API. JSend provides a clear format for distinguishing between success and error states, and allows structured error details to be returned.
 
-## Security Vulnerabilities
+By adopting this standard, the API becomes more robust and easier to integrate with frontend applications or third-party services.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Tech Stack
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- **Framework**: Laravel 12.x
+- **Database**: SQLite
+- **API Response Format**: JSend standard
+
+---
+
+## Features Implemented
+
+| Feature | Description |
+|--------|-------------|
+| Create Todo Item | POST `/api/todos` |
+| Get Todos | GET `/api/todos` with filters |
+| Get Todo Item | GET `/api/todos/{id}` |
+| Export Todos to Excel | GET `/api/todos/export` with filters |
+| Chart Data Endpoint | GET `/api/chart?type=[status\|priority\|assignee]` |
+| Request Validation | Form requests and centralized error handling |
+| Filter Support | Query parameters for filtering todos |
+| Summary Row in Excel | Total todos and total time tracked |
+
+---
+
+## Copyright
+
+© [Ahmad Ma'ruf](mailto:ahmadmaruf2701@gmail.com) - 2025
