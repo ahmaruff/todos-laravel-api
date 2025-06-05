@@ -16,6 +16,8 @@ Route::group([
     'prefix' => 'todos',
     'name' => 'todos.',
 ], function() {
+    Route::get('/chart', [\App\Http\Controllers\Api\TodoChartController::class, 'index'])->name('chart');
+
     Route::get('/', [\App\Http\Controllers\Api\TodoController::class, 'index'])->name('index');
     Route::post('/', [\App\Http\Controllers\Api\TodoController::class, 'store'])->name('store');
     Route::get('/{id}', [\App\Http\Controllers\Api\TodoController::class, 'show'])->name('show');
