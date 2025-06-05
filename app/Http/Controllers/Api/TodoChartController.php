@@ -118,16 +118,31 @@ class TodoChartController extends Controller
             $query->where('due_date', '<=', $endDate);
         }
 
-        $assigneeStrings = $query->select('assignee')->pluck('assignee');
+        $todos = Todo::select('assignee', 'status', 'time_tracked')->get();
 
         $summary = [];
 
-        foreach ($assigneeStrings as $row) {
-            $names = array_map('trim', explode(',', $row));
+        foreach ($todos as $todo) {
+            $assignees = array_map('trim', explode(',', $todo->assignee));
 
-            foreach ($names as $name) {
-                $cnt = $summary[$name] ?? 0;
-                $summary[$name] = $cnt + 1;
+            foreach ($assignees as $name) {
+                if (!isset($summary[$name])) {
+                    $summary[$name] = [
+                        'total_todos' => 0,
+                        'total_pending_todos' => 0,
+                        'total_timetracked_completed_todos' => 0,
+                    ];
+                }
+
+                $summary[$name]['total_todos']++;
+
+                if ($todo->status === Todo::STATUS_PENDING) {
+                    $summary[$name]['total_pending_todos']++;
+                }
+
+                if ($todo->status === Todo::STATUS_COMPLETED && $todo->time_tracked > 0) {
+                    $summary[$name]['total_timetracked_completed_todos']++;
+                }
             }
         }
 
