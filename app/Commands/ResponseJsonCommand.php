@@ -10,17 +10,17 @@ class ResponseJsonCommand
     public const FAIL = 'fail';
     public const ERROR = 'error';
 
-    public static function responseSuccess(string $message, $data, int $code = Response::HTTP_OK)
+    public static function responseSuccess(string $message = 'success', $data = null, int $code = Response::HTTP_OK)
     {
         return self::render(self::SUCCESS, $code, $message, $data);
     }
 
-    public static function responseFail(string $message, $data = null, int $code = Response::HTTP_BAD_REQUEST)
+    public static function responseFail(string $message = 'fail', $data = null, int $code = Response::HTTP_BAD_REQUEST)
     {
         return self::render(self::FAIL, $code, $message, $data);
     }
 
-    public static function responseError( string $message, $data = null, int $code = Response::HTTP_INTERNAL_SERVER_ERROR)
+    public static function responseError( string $message = 'error', $data = null, int $code = Response::HTTP_INTERNAL_SERVER_ERROR)
     {
         return self::render(self::ERROR, $code, $message, $data);
 
