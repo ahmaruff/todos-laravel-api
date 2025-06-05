@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Commands\ModelPaginationCommand;
 use App\Models\Todo;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -16,35 +17,47 @@ class TodoService
 
     public function list(array $filters = [], bool $paginate = false)
     {
-        $query = Todo::query();
-
         $page = (int) ($filters['page'] ?? 1);
         $perPage = (int) ($filters['per_page'] ?? 10);
 
         unset($filters['page'], $filters['per_page']);
 
-        if (!empty($filters['title'])) {
-            $query->where('title', 'like', '%' . $filters['title'] . '%');
-        }
+        $start = null;
+        $end = null;
 
         if (!empty($filters['start'])) {
             $start = Carbon::parse($filters['start'])->startOfDay()->utc();
-            $query->whereDate('due_date', '>=', $start);
         }
 
         if (!empty($filters['end'])) {
             $end = Carbon::parse($filters['end'])->endOfDay()->utc();
-            $query->whereDate('due_date', '<=', $end);
+        }
+
+        // === start query ===
+        $query = Todo::query();
+
+        if (!empty($filters['title'])) {
+            $query->where('title', 'like', '%' . $filters['title'] . '%');
+        }
+
+        if ($start && $end) {
+            $query->whereBetween('due_date', [$start, $end]);
+        } else {
+            if ($start) {
+                $query->where('due_date', '>=', $start);
+            }
+            if ($end) {
+                $query->where('due_date', '<=', $end);
+            }
         }
 
         if (!empty($filters['min'])) {
-            $query->whereDate('time_tracked', '>=', $filters['min']);
+            $query->where('time_tracked', '>=', $filters['min']);
         }
 
         if (!empty($filters['max'])) {
-            $query->whereDate('time_tracked', '<=', $filters['max']);
+            $query->where('time_tracked', '<=', $filters['max']);
         }
-
 
         if (!empty($filters['assignee'])) {
             $assignees = array_map('trim', explode(',', $filters['assignee']));
@@ -94,14 +107,22 @@ class TodoService
     {
         $this->logService->start()->task();
 
+        $isUpdate = isset($data['id']);
+
+        if($isUpdate) {
+            $dueDateRules = ['sometimes'];
+        } else {
+            $dueDateRules = ['required', 'date', 'after_or_equal:today'];
+        }
+
         $rules = [
             'id' => ['sometimes', 'nullable', 'exists:todos,id'],
-            'title' => ['required', 'string'],
+            'title' => [$isUpdate ? 'sometimes' : 'required', 'string'],
             'assignee' => ['sometimes', 'nullable', 'string'],
-            'due_date' => ['required', 'date', 'after_or_equal:today'],
-            'time_tracked' => ['sometimes','nullable', 'integer'],
-            'status' => ['sometimes', 'nullable', 'string',Rule::in(Todo::$statusList)],
-            'priority' => ['required', 'string',Rule::in(Todo::$priorityList)],
+            'due_date' => $dueDateRules,
+            'time_tracked' => ['sometimes', 'nullable', 'integer'],
+            'status' => ['sometimes', 'nullable', 'string', Rule::in(Todo::$statusList)],
+            'priority' => [$isUpdate ? 'sometimes' : 'required', 'string', Rule::in(Todo::$priorityList)],
         ];
 
         $validator = Validator::make($data, $rules);
@@ -111,16 +132,17 @@ class TodoService
         }
 
         $validated = $validator->validated();
+
+        $validated['due_date'] = Carbon::parse($validated['due_date'])->utc()->toDateTimeString();
+
         $validated = $this->handleDefaultValue($validated);
 
         DB::beginTransaction();
 
         try {
-            $isUpdate = isset($validated['id']);
-
             if ($isUpdate) {
                 $todo = Todo::findOrFail($validated['id']);
-                $todo->update($validated);
+                $todo->fill(Arr::except($validated, 'id'))->save();
             } else {
                 $todo = Todo::create($validated);
             }

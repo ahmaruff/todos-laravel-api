@@ -105,12 +105,12 @@ class TodoController extends Controller
     public function update(Request $request, string $id)
     {
         $rules = [
-            'title' => ['required', 'string'],
+            'title' => ['sometimes','nullable', 'string'],
             'assignee' => ['sometimes', 'nullable', 'string'],
-            'due_date' => ['required', 'date', 'after_or_equal:today'],
+            'due_date' => ['sometimes', 'nullable', 'date'],
             'time_tracked' => ['sometimes','nullable', 'integer'],
             'status' => ['sometimes', 'nullable', 'string',Rule::in(Todo::$statusList)],
-            'priority' => ['required', 'string',Rule::in(Todo::$priorityList)],
+            'priority' => ['sometimes', 'nullable', 'string',Rule::in(Todo::$priorityList)],
         ];
 
         $validator = Validator::make($request->json()->all(), $rules);
