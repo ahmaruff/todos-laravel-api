@@ -136,9 +136,9 @@ class TodoService
 
         $validated = $validator->validated();
 
-        $validated['due_date'] = Carbon::parse($validated['due_date'])->utc()->toDateTimeString();
-
-        $validated = $this->handleDefaultValue($validated);
+        if(isset($validated['due_date'])) {
+            $validated['due_date'] = Carbon::parse($validated['due_date'])->utc()->toDateTimeString();
+        }
 
         DB::beginTransaction();
 
