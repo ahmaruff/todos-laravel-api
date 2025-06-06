@@ -94,14 +94,14 @@ class TodoService
             $result = ModelPaginationCommand::execute($query, $perPage, $page, $filters,  null);
 
             return [
-                'todos' => $result['items'],
-                'pagination' => $result['pagination']
+                'todos' => $result['items'] ?? [],
+                'pagination' => $result['pagination'] ?? null
             ];
         }
 
         $todos = $query->latest()->get();
         return [
-            'todos' => $todos,
+            'todos' => $todos ?? [],
             'pagination' => null
         ];
     }
@@ -199,122 +199,117 @@ class TodoService
 
     public function export(array $filters)
     {
-        // excel data setup
-        $disk = Storage::disk('local');
 
-        if(!$disk->exists('exports')) {
-            $disk->makeDirectory('exports');
-        }
+        try {
+            // setup data filters
+            $start = $this->convertDate($filters['start'] ?? null, 'start');
+            $end = $this->convertDate($filters['end'] ?? null, 'end');
 
-        $fileName = 'todo_export_' . now()->format('Ymd_His') . '.xlsx';
-        $filePath = $disk->path("exports/{$fileName}");
+            // === start query ===
+            $query = Todo::query();
 
-        $writer = new Writer();
-
-        $writer->openToFile($filePath);
-
-        $headers = ['title', 'assignee', 'due_date', 'time_tracked', 'status', 'priority'];
-
-        $headerRow = Row::fromValues($headers);
-        $writer->addRow($headerRow);
-
-        // start db Query
-        $start = null;
-        $end = null;
-
-        if (!empty($filters['start'])) {
-            $start = $this->convertDate($filters['start'], 'start');
-        }
-
-        if (!empty($filters['end'])) {
-            $end = $this->convertDate($filters['end'], 'end');
-        }
-
-        // === start query ===
-        $query = Todo::query();
-
-        if (!empty($filters['title'])) {
-            $query->where('title', 'like', '%' . $filters['title'] . '%');
-        }
-
-        if ($start && $end) {
-            $query->whereBetween('due_date', [$start, $end]);
-        } else {
-            if ($start) {
-                $query->where('due_date', '>=', $start);
+            if (!empty($filters['title'])) {
+                $query->where('title', 'like', '%' . $filters['title'] . '%');
             }
-            if ($end) {
-                $query->where('due_date', '<=', $end);
+
+            if ($start && $end) {
+                $query->whereBetween('due_date', [$start, $end]);
+            } else {
+                if ($start) {
+                    $query->where('due_date', '>=', $start);
+                }
+                if ($end) {
+                    $query->where('due_date', '<=', $end);
+                }
             }
-        }
 
-        if (!empty($filters['min'])) {
-            $query->where('time_tracked', '>=', $filters['min']);
-        }
+            if (!empty($filters['min'])) {
+                $query->where('time_tracked', '>=', $filters['min']);
+            }
 
-        if (!empty($filters['max'])) {
-            $query->where('time_tracked', '<=', $filters['max']);
-        }
+            if (!empty($filters['max'])) {
+                $query->where('time_tracked', '<=', $filters['max']);
+            }
 
-        if (!empty($filters['assignee'])) {
-            $assignees = array_map('trim', explode(',', $filters['assignee']));
-            $query->where(function ($q) use ($assignees) {
-                foreach ($assignees as $assignee) {
-                    $q->orWhere(function ($q2) use ($assignee) {
-                        $q2->where('assignee', $assignee)
-                        ->orWhere('assignee', 'LIKE', "$assignee,%")
-                        ->orWhere('assignee', 'LIKE', "%, $assignee")
-                        ->orWhere('assignee', 'LIKE', "%,$assignee")
-                        ->orWhere('assignee', 'LIKE', "%, $assignee,%")
-                        ->orWhere('assignee', 'LIKE', "%,$assignee,%");
-                    });
+            if (!empty($filters['assignee'])) {
+                $assignees = array_map('trim', explode(',', $filters['assignee']));
+                $query->where(function ($q) use ($assignees) {
+                    foreach ($assignees as $assignee) {
+                        $q->orWhere(function ($q2) use ($assignee) {
+                            $q2->where('assignee', $assignee)
+                            ->orWhere('assignee', 'LIKE', "$assignee,%")
+                            ->orWhere('assignee', 'LIKE', "%, $assignee")
+                            ->orWhere('assignee', 'LIKE', "%,$assignee")
+                            ->orWhere('assignee', 'LIKE', "%, $assignee,%")
+                            ->orWhere('assignee', 'LIKE', "%,$assignee,%");
+                        });
+                    }
+                });
+            }
+
+            if (!empty($filters['status'])) {
+                $status = trim($filters['status']);
+                $query->where('status', $status);
+            }
+
+            // Filter by priority
+            if (!empty($filters['priority'])) {
+                $priority = trim($filters['priority']);
+                $query->where('priority', $priority);
+            }
+
+            // wait before we start to setup th excel
+            $query->select('title', 'assignee', 'due_date', 'time_tracked', 'status', 'priority');
+
+            // excel data setup
+            $disk = Storage::disk('local');
+            if(!$disk->exists('exports')) {
+                $disk->makeDirectory('exports');
+            }
+
+            $fileName = 'todo_export_' . now()->format('Ymd_His') . '.xlsx';
+            $filePath = $disk->path("exports/{$fileName}");
+
+            $writer = new Writer();
+            $writer->openToFile($filePath);
+
+            $headers = ['title', 'assignee', 'due_date', 'time_tracked', 'status', 'priority'];
+            $headerRow = Row::fromValues($headers);
+            $writer->addRow($headerRow);
+
+            // start to populate the file
+            $totalRow = 0;
+            $totalTimeTracked = 0;
+
+            // Stream data in chunks
+            $query->chunk(500, function ($todos) use($writer, &$totalRow, &$totalTimeTracked) {
+                foreach ($todos as $todo) {
+                    $todoArr = $todo->toArray();
+                    if(!empty($todoArr)) {
+                        $writer->addRow(Row::fromValues($todoArr));
+                        $totalRow += 1;
+                        $totalTimeTracked += (int) $todo->time_tracked;
+                    }
                 }
             });
+
+            // footer/end of file
+            $summaryRows = [
+                Row::fromValues(['total_todos', $totalRow]),
+                Row::fromValues(['total_time_tracked', $totalTimeTracked]),
+            ];
+
+            $writer->addRows($summaryRows);
+            $writer->close();
+
+            return [
+                'total_row' => $totalRow,
+                'total_time_tracked' => $totalTimeTracked,
+                'filename' => $fileName
+            ];
+        } catch (\Throwable $th) {
+            throw $th;
         }
-
-        if (!empty($filters['status'])) {
-            $status = trim($filters['status']);
-            $query->where('status', $status);
-        }
-
-        // Filter by priority
-        if (!empty($filters['priority'])) {
-            $priority = trim($filters['priority']);
-            $query->where('priority', $priority);
-        }
-
-        $query->select('title', 'assignee', 'due_date', 'time_tracked', 'status', 'priority');
-
-        $totalRow = 0;
-        $totalTimeTracked = 0;
-
-        // Stream data in chunks
-        $query->chunk(500, function ($todos) use($writer, &$totalRow, &$totalTimeTracked) {
-            foreach ($todos as $todo) {
-                $todoArr = $todo->toArray();
-                if(!empty($todoArr)) {
-                    $writer->addRow(Row::fromValues($todoArr));
-                    $totalRow += 1;
-
-                    $totalTimeTracked += (int) $todo->time_tracked;
-                }
-            }
-        });
-
-        $summaryRows = [
-            Row::fromValues(['total_todos', $totalRow]),
-            Row::fromValues(['total_time_tracked', $totalTimeTracked]),
-        ];
-
-        $writer->addRows($summaryRows);
-        $writer->close();
-
-        // file return
-        return [
-            'total_row' => $totalRow,
-            'total_time_tracked' => $totalTimeTracked,
-            'filename' => $fileName
-        ];
     }
 
     public function statusChart(array $filters)
@@ -430,7 +425,7 @@ class TodoService
         return $data;
     }
 
-    private function convertDate($date, string $type = 'as_is')
+    private function convertDate($date = null, string $type = 'as_is')
     {
         $type = strtolower($type);
         $typeList = ['start', 'end', 'as_is'];
