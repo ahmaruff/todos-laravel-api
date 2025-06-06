@@ -1,0 +1,764 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Todo CRUD API",
+        "description": "Todo list CRUD Web API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/todos": {
+            "get": {
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Get all todos with optional filtering and pagination",
+                "description": "Retrieve todos with optional filters. When paginate=true, response includes pagination metadata.",
+                "operationId": "521da6d629de5b14a88d7b8c218cb6a1",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "Filter by title (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assignee",
+                        "in": "query",
+                        "description": "Filter by assignee",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "open",
+                                "in_progress",
+                                "completed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "description": "Filter by priority",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "Filter by due date start range",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "description": "Filter by due date end range",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "min",
+                        "in": "query",
+                        "description": "Filter by minimum time tracked (minutes)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "max",
+                        "in": "query",
+                        "description": "Filter by maximum time tracked (minutes)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "paginate",
+                        "in": "query",
+                        "description": "Enable pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "false",
+                            "enum": [
+                                "true",
+                                "false",
+                                "1",
+                                "0"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Todos retrieved successfully. Response format depends on 'paginate' parameter.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "description": "When paginate=false: contains only 'todos' array. When paginate=true: contains 'todos' array and 'pagination' object.",
+                                                    "properties": {
+                                                        "todos": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "$ref": "#/components/schemas/Todo"
+                                                            }
+                                                        },
+                                                        "pagination": {
+                                                            "$ref": "#/components/schemas/Pagination"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Create new todo",
+                "description": "Create a new todo item with validation",
+                "operationId": "9b07ee37ef539d3573ba1ca6c3ad7fb1",
+                "requestBody": {
+                    "description": "Todo data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateTodoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Todo created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "todo": {
+                                                            "$ref": "#/components/schemas/Todo"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "error": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/todos/{id}": {
+            "get": {
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Get single todo",
+                "description": "get single todo item by id",
+                "operationId": "c7cfad681d3a421509390996e9c30925",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Todo ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Todo retrieved successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "todo": {
+                                                            "$ref": "#/components/schemas/Todo"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Update todo",
+                "description": "Update todo item with validation",
+                "operationId": "3b87e27d1714d5f0f389613c9f54bea2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Todo ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Todo data",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateTodoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Todo updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "todo": {
+                                                            "$ref": "#/components/schemas/Todo"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "error": {
+                                                            "type": "object",
+                                                            "additionalProperties": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "string"
+                                                                }
+                                                            }
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Todos"
+                ],
+                "summary": "Delete single todo",
+                "description": "Delete single todo item by id",
+                "operationId": "3db9089ef72b760f725785301a469fe7",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Todo ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Todo deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "BaseResponse": {
+                "description": "API base response structure",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "success",
+                            "fail",
+                            "error"
+                        ],
+                        "example": "success"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Whoops! Something wrong"
+                    },
+                    "data": {
+                        "description": "Response data - structure varies by endpoint"
+                    }
+                },
+                "type": "object"
+            },
+            "CreateTodoRequest": {
+                "description": "Request payload for creating a new todo",
+                "required": [
+                    "title",
+                    "due_date",
+                    "priority"
+                ],
+                "properties": {
+                    "title": {
+                        "description": "Title of the todo item",
+                        "type": "string"
+                    },
+                    "assignee": {
+                        "description": "Person assigned to this todo",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "due_date": {
+                        "description": "Due date for the todo (must be today or future date)",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "time_tracked": {
+                        "description": "Time tracked in minutes",
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Status of the todo",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "open",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "nullable": true
+                    },
+                    "priority": {
+                        "description": "Priority level of the todo",
+                        "type": "string",
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "ErrorResponse": {
+                "description": "Error response",
+                "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "success",
+                            "fail",
+                            "error"
+                        ],
+                        "example": "success"
+                    },
+                    "code": {
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Whoops! Something wrong"
+                    },
+                    "data": {
+                        "properties": {
+                            "error": {
+                                "type": "string",
+                                "example": "Whoops! Something wrong"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "description": "Pagination information",
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "total_pages": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "previous_page_url": {
+                        "type": "string",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "next_page_url": {
+                        "type": "string",
+                        "example": "http://example.com/api/todos?page=2",
+                        "nullable": true
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 47
+                    }
+                },
+                "type": "object"
+            },
+            "Todo": {
+                "description": "Todo",
+                "properties": {
+                    "id": {
+                        "description": "Unique identifier for the todo item",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "description": "Title of the todo item",
+                        "type": "string",
+                        "maxLength": 255,
+                        "example": "Complete project documentation"
+                    },
+                    "assignee": {
+                        "description": "Person assigned to this todo",
+                        "type": "string",
+                        "example": "John Doe",
+                        "nullable": true
+                    },
+                    "due_date": {
+                        "description": "Due date and time for the todo",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-06-15T14:30:00Z",
+                        "nullable": true
+                    },
+                    "time_tracked": {
+                        "description": "Time tracked in minutes",
+                        "type": "integer",
+                        "example": 120,
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Current status of the todo",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "open",
+                            "in_progress",
+                            "completed"
+                        ],
+                        "example": "in_progress"
+                    },
+                    "priority": {
+                        "description": "Priority level of the todo",
+                        "type": "string",
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                        ],
+                        "example": "high"
+                    },
+                    "created_at": {
+                        "description": "When the todo was created",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-06-06T10:00:00Z"
+                    },
+                    "updated_at": {
+                        "description": "When the todo was last updated",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-06-06T15:30:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateTodoRequest": {
+                "description": "Request payload for updating a todo (all fields optional)",
+                "properties": {
+                    "title": {
+                        "description": "Title of the todo item",
+                        "type": "string"
+                    },
+                    "assignee": {
+                        "description": "Person assigned to this todo",
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "due_date": {
+                        "description": "Due date for the todo (must be today or future date)",
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "time_tracked": {
+                        "description": "Time tracked in minutes",
+                        "type": "integer",
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "status": {
+                        "description": "Status of the todo",
+                        "type": "string",
+                        "enum": [
+                            "pending",
+                            "open",
+                            "in_progress",
+                            "completed"
+                        ]
+                    },
+                    "priority": {
+                        "description": "Priority level of the todo",
+                        "type": "string",
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                        ]
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Todos",
+            "description": "Todos"
+        }
+    ]
+}
