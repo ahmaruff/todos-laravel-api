@@ -24,27 +24,33 @@ class TodoExportController extends Controller
             'end' => $end,
         ];
 
-        $result = $this->todoService->export($filters);
-        $filename = $result['filename'];
+        try {
+            $result = $this->todoService->export($filters);
+            $filename = $result['filename'];
 
-        $downloadUrl = route('todos.download', $filename);
-
-        $result['url'] = $downloadUrl;
-
-        return ResponseJsonCommand::responseSuccess('success export', $result);
+            $downloadUrl = route('todos.download', $filename);
+            $result['url'] = $downloadUrl;
+            return ResponseJsonCommand::responseSuccess('success export', $result);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public function download(string $filename)
     {
-        $path = 'exports/' . basename($filename);
+        try {
+            $path = 'exports/' . basename($filename);
 
-        if (!Storage::disk('local')->exists($path)) {
-            return ResponseJsonCommand::responseFail('File not found', [
-                'filename' => $filename,
-                'exists' => false
-            ], Response::HTTP_NOT_FOUND);
+            if (!Storage::disk('local')->exists($path)) {
+                return ResponseJsonCommand::responseFail('File not found', [
+                    'filename' => $filename,
+                    'exists' => false
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            return Storage::disk('local')->download($path);
+        } catch (\Throwable $th) {
+            throw $th;
         }
-
-        return Storage::disk('local')->download($path);
     }
 }
