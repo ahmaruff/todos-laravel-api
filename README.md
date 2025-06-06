@@ -1,4 +1,5 @@
 # Todo List APIs Backend (Laravel)
+© [Ahmad Ma'ruf](mailto:ahmadmaruf2701@gmail.com) - 2025
 
 A RESTful API backend built with **Laravel**, designed to manage todo items with support for:
 - Creating todos
@@ -16,7 +17,7 @@ In addition to fulfilling the functional requirements, this implementation aims 
 - Interactive API documentation via Swagger UI
 - Comprehensive logging system for debugging and monitoring
 
-Some aspects of the implementation differ slightly from the specification. These variations are intentional and based on common industry patterns and practical trade-offs.
+Some aspects of the implementation **differ slightly from the specification**. These variations are intentional and based on common industry patterns and practical trade-offs.
 
 ---
 
