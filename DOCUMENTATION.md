@@ -70,6 +70,9 @@ All endpoints are prefixed with:
   * `priority`
   * `min` (minimum `time_tracked`)
   * `max` (maximum `time_tracked`)
+  * `paginate` (optional: `true` or `false`)
+  * `page` (set current_page pagination)
+  * `per_page` (set number of item on pagination)
 
 * **Response**:
 
@@ -132,7 +135,17 @@ All endpoints are prefixed with:
 
 * **URL**: `/api/todos/export`
 * **Method**: `GET`
-* **Query Parameters**: Same as the `GET /api/todos` endpoint
+* **Query Parameters**:
+
+  * `title`
+  * `assignee`
+  * `start` (UTC format)
+  * `end` (UTC format)
+  * `status`
+  * `priority`
+  * `min` (minimum `time_tracked`)
+  * `max` (maximum `time_tracked`)
+
 * **Response**:
 
 ```json
@@ -160,8 +173,15 @@ All endpoints are prefixed with:
 * **Method**: `GET`
 
 * **Query Parameters**:
-
   * `type` (required): `status`, `priority`, or `assignee`
+  * `title`
+  * `assignee`
+  * `start` (UTC format)
+  * `end` (UTC format)
+  * `status`
+  * `priority`
+  * `min` (minimum `time_tracked`)
+  * `max` (maximum `time_tracked`)
 
 * **Response**:
 

@@ -1,4 +1,5 @@
 # Todo List APIs Backend (Laravel)
+© [Ahmad Ma'ruf](mailto:ahmadmaruf2701@gmail.com) - 2025
 
 A RESTful API backend built with **Laravel**, designed to manage todo items with support for:
 - Creating todos
@@ -13,8 +14,10 @@ In addition to fulfilling the functional requirements, this implementation aims 
 - Adherence to modern development practices
 - Understanding of API design standards
 - Consideration of long-term maintainability and scalability
+- Interactive API documentation via Swagger UI
+- Comprehensive logging system for debugging and monitoring
 
-Some aspects of the implementation differ slightly from the specification. These variations are intentional and based on common industry patterns and practical trade-offs.
+Some aspects of the implementation **differ slightly from the specification**. These variations are intentional and based on common industry patterns and practical trade-offs.
 
 ---
 
@@ -86,13 +89,17 @@ Organizing all endpoints under the /api/todos namespace adheres to RESTful desig
 | Get Todo Item | GET `/api/todos/{id}` |
 | Export Todos to Excel | GET `/api/todos/export` with filters |
 | Chart Data Endpoint | GET `/api/todos/chart?type=[status\|priority\|assignee]` |
+| Logging Support | Get `/api/logs` |
+| OpenAPI/Swagger Support | Get `/api/documentation` |
 | Request Validation | Form requests and centralized error handling |
 | Filter Support | Query parameters for filtering todos |
 
 ---
 
 ## API Documentation
-all APIs documentation can be found in the [`DOCUMENTATION.md`](./DOCUMENTATION.md) file
+- **Manual Documentation**: All APIs documentation can be found in the [`DOCUMENTATION.md`](./DOCUMENTATION.md) file
+- **OpenAPI/Swagger**: Interactive API documentation available at `/api/documentation` 
+- **Postman Collection**: Ready-to-import collection available at [`todolist_postman_collection.json`](./todolist_postman_collection.json)
 
 ## Instalation
 Follow these steps to set up the project locally:
