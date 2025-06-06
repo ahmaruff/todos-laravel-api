@@ -59,13 +59,13 @@ By adopting this standard, the API becomes more robust and easier to integrate w
 ### Rationale:
 Organizing all endpoints under the /api/todos namespace adheres to RESTful design principles and improves consistency across the API. This decision enables:
 
-Clear versioning and separation: Routes prefixed with /api/ clearly indicate programmatic access points, distinct from web views or other interfaces.
+- Clear versioning and separation: Routes prefixed with /api/ clearly indicate programmatic access points, distinct from web views or other interfaces.
 
-Modular resource grouping: Grouping by resource (todos) helps developers quickly understand the API structure and improves discoverability.
+- Modular resource grouping: Grouping by resource (todos) helps developers quickly understand the API structure and improves discoverability.
 
-Easier scalability: Additional routes like /api/todos/stats, /api/todos/export, or /api/todos/{id}/comments can be added cleanly under this namespace without ambiguity.
+- Easier scalability: Additional routes like /api/todos/stats, /api/todos/export, or /api/todos/{id}/comments can be added cleanly under this namespace without ambiguity.
 
-Simplified security and middleware handling: Middleware (e.g., auth, rate limiting) can be applied to the /api group as a whole.
+- Simplified security and middleware handling: Middleware (e.g., auth, rate limiting) can be applied to the /api group as a whole.
 
 ---
 
@@ -90,6 +90,70 @@ Simplified security and middleware handling: Middleware (e.g., auth, rate limiti
 | Filter Support | Query parameters for filtering todos |
 
 ---
+
+## API Documentation
+all APIs documentation can be found in the [`DOCUMENTATION.md`](./DOCUMENTATION.md) file
+
+## Instalation
+Follow these steps to set up the project locally:
+
+### 0. Prerequisites
+Make sure the following dependencies are installed on your system before proceeding:
+
+- PHP >= 8.2
+- SQLite (or MySQL / PostgreSQL — configurable in .env)
+- Composer (PHP dependency manager)
+
+### 1. Clone the repository
+```sh
+git clone https://github.com/ahmaruff/todos-laravel-api.git
+cd todos-laravel-api
+```
+
+### 2. Install Dependencies
+```sh
+composer install
+```
+
+### 3. Setup Environtment File
+Copy the example environment file and configure it as needed:
+
+```sh
+cp .env.example .env
+```
+
+Edit .env and update the following variables:
+
+```
+APP_NAME=TodoApp
+APP_URL=http://localhost
+
+DB_CONNECTION=sqlite
+# DB_HOST=127.0.0.1
+# DB_PORT=3306
+# DB_DATABASE=your_database
+# DB_USERNAME=your_username
+# DB_PASSWORD=your_password
+```
+
+### 4. Generate Aplication Key
+```
+php artisan key:generate
+```
+
+### 5. Run Database Migrations
+```
+php artisan migrate
+
+```
+
+### 6. Serve The Application
+```
+php artisan serve
+```
+
+The app should now be accessible at `http://localhost:8000`.
+
 
 ## Copyright
 
