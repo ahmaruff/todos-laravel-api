@@ -53,13 +53,17 @@ class TodoController extends Controller
             'per_page' => $perPage ?? null,
         ];
 
-        $result = $this->todoService->list($filters, $paginate);
+        try {
+            $result = $this->todoService->list($filters, $paginate);
 
-        if($paginate) {
-            return ResponseJsonCommand::responseSuccess('success', $result);
+            if($paginate) {
+                return ResponseJsonCommand::responseSuccess('success', $result);
+            }
+
+            return ResponseJsonCommand::responseSuccess('success', ['todos' => $result['todos'] ?? []]);
+        } catch (\Throwable $th) {
+            throw $th;
         }
-
-        return ResponseJsonCommand::responseSuccess('success', ['todos' => $result['todos'] ?? []]);
     }
 
     /**
@@ -84,9 +88,13 @@ class TodoController extends Controller
 
         $validated = $validator->validated();
 
-        $todo = $this->todoService->save($validated);
+        try {
+            $todo = $this->todoService->save($validated);
 
-        return ResponseJsonCommand::responseSuccess("success save todo", ['todo' => $todo], Response::HTTP_CREATED);
+            return ResponseJsonCommand::responseSuccess("success save todo", ['todo' => $todo], Response::HTTP_CREATED);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     /**
@@ -94,8 +102,12 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        $todo = $this->todoService->find($id);
-        return ResponseJsonCommand::responseSuccess("success get todo", ['todo' => $todo]);
+        try {
+            $todo = $this->todoService->find($id);
+            return ResponseJsonCommand::responseSuccess("success get todo", ['todo' => $todo]);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
 
@@ -122,9 +134,13 @@ class TodoController extends Controller
         $validated = $validator->validated();
         $validated['id'] = $id;
 
-        $todo = $this->todoService->save($validated);
+        try {
+            $todo = $this->todoService->save($validated);
 
-        return ResponseJsonCommand::responseSuccess("success save todo", ['todo' => $todo], Response::HTTP_OK);
+            return ResponseJsonCommand::responseSuccess("success save todo", ['todo' => $todo], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     /**
@@ -132,8 +148,11 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        $result = $this->todoService->delete($id);
-
-        return ResponseJsonCommand::responseSuccess("success delete todo");
+        try {
+            $result = $this->todoService->delete($id);
+            return ResponseJsonCommand::responseSuccess("success delete todo");
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }
