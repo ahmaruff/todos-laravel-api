@@ -690,6 +690,275 @@
                     }
                 }
             }
+        },
+        "/api/todos/export": {
+            "get": {
+                "tags": [
+                    "Todo Export"
+                ],
+                "summary": "Export todos to Excel",
+                "description": "Export filtered todos to Excel file and return download URL",
+                "operationId": "ef3baf193144d6816559c8e6bdc8b84e",
+                "parameters": [
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "Filter by title (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assignee",
+                        "in": "query",
+                        "description": "Filter by assignee",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "open",
+                                "in_progress",
+                                "completed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "description": "Filter by priority",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "Filter by due date start range",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "description": "Filter by due date end range",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "min",
+                        "in": "query",
+                        "description": "Filter by minimum time tracked (minutes)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "max",
+                        "in": "query",
+                        "description": "Filter by maximum time tracked (minutes)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Excel file exported successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "total_row": {
+                                                            "description": "Number of todos exported",
+                                                            "type": "integer",
+                                                            "example": 25
+                                                        },
+                                                        "total_time_tracked": {
+                                                            "description": "Sum of todos time tracked if status = completed",
+                                                            "type": "integer",
+                                                            "example": 25
+                                                        },
+                                                        "filename": {
+                                                            "description": "Generated Excel filename",
+                                                            "type": "string",
+                                                            "example": "todos_export_2025_06_06_123456.xlsx"
+                                                        },
+                                                        "url": {
+                                                            "description": "Download URL for the exported file",
+                                                            "type": "string",
+                                                            "example": "http://localhost:8000/api/todos/download/todos_export_2025_06_06_123456.xlsx"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during export",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/todos/download/{filename}": {
+            "get": {
+                "tags": [
+                    "Todo Export"
+                ],
+                "summary": "Download exported Excel file",
+                "description": "Download the exported Excel file by filename",
+                "operationId": "e760e17eaded8f23f9ec0b5054fa0998",
+                "parameters": [
+                    {
+                        "name": "filename",
+                        "in": "path",
+                        "description": "The filename of the exported Excel file",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^[a-zA-Z0-9_.-]+\\.xlsx$",
+                            "example": "todos_export_2025_06_06_123456.xlsx"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File downloaded successfully",
+                        "headers": {
+                            "Content-Dispotition": {
+                                "description": "Attachment with filename",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "attachment; filename=todos_export.xlsx"
+                                }
+                            },
+                            "Content-Type": {
+                                "description": "MIME type of the file",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "description": "Excel file content",
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "File not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "properties": {
+                                                        "filename": {
+                                                            "type": "string"
+                                                        },
+                                                        "exists": {
+                                                            "type": "boolean",
+                                                            "example": false
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid filename format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error during download",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -963,6 +1232,10 @@
         {
             "name": "Todos",
             "description": "Todos"
+        },
+        {
+            "name": "Todo Export",
+            "description": "Todo Export"
         }
     ]
 }
