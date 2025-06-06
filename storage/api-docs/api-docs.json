@@ -6,6 +6,206 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/api/todos/chart": {
+            "get": {
+                "tags": [
+                    "Chart"
+                ],
+                "summary": "Get todos's chart with optional filtering",
+                "description": "Retrieve todos's chart with optional filtering",
+                "operationId": "7d6a6d5687de74a38c2f204039a25fa1",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "query",
+                        "description": "Filter by chart type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "status",
+                                "priority",
+                                "assignee"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "title",
+                        "in": "query",
+                        "description": "Filter by title (partial match)",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assignee",
+                        "in": "query",
+                        "description": "Filter by assignee",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter by status",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pending",
+                                "open",
+                                "in_progress",
+                                "completed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "priority",
+                        "in": "query",
+                        "description": "Filter by priority",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "Filter by due date start range",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "description": "Filter by due date end range",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "min",
+                        "in": "query",
+                        "description": "Filter by minimum time tracked (minutes)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    {
+                        "name": "max",
+                        "in": "query",
+                        "description": "Filter by maximum time tracked (minutes)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Todos retrieved successfully. Response format depends on 'type' parameter.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/BaseResponse"
+                                        },
+                                        {
+                                            "properties": {
+                                                "data": {
+                                                    "description": "When type filter is exists: contain only chart by defined by type",
+                                                    "properties": {
+                                                        "status_summary": {
+                                                            "properties": {
+                                                                "pending": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "open": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "in_progress": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "completed": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "priority_summary": {
+                                                            "properties": {
+                                                                "low": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "medium": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "high": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        },
+                                                        "assignee_summary": {
+                                                            "properties": {
+                                                                "user": {
+                                                                    "properties": {
+                                                                        "total_todos": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "total_pending_todos": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "total_timetracked_completed_todos": {
+                                                                            "type": "integer"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/todos": {
             "get": {
                 "tags": [
@@ -756,6 +956,10 @@
         }
     },
     "tags": [
+        {
+            "name": "Chart",
+            "description": "Chart"
+        },
         {
             "name": "Todos",
             "description": "Todos"
