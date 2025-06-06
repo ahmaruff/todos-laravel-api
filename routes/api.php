@@ -14,9 +14,11 @@ Route::get('logs', [\App\Http\Controllers\LogController::class, 'index'])->name(
 
 Route::group([
     'prefix' => 'todos',
-    'name' => 'todos.',
+    'as' => 'todos.',
 ], function() {
     Route::get('/chart', [\App\Http\Controllers\Api\TodoChartController::class, 'index'])->name('chart');
+    Route::get('/export', [\App\Http\Controllers\Api\TodoExportController::class, 'excel'])->name('export');
+    Route::get('/download/{filename}', [\App\Http\Controllers\Api\TodoExportController::class, 'download'])->name('download');
 
     Route::get('/', [\App\Http\Controllers\Api\TodoController::class, 'index'])->name('index');
     Route::post('/', [\App\Http\Controllers\Api\TodoController::class, 'store'])->name('store');
