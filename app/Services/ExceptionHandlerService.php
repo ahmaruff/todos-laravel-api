@@ -86,6 +86,10 @@ class ExceptionHandlerService
             ];
         }
 
+        if(!app()->isProduction()) {
+            $data['error_detail'] = $this->getErrorDetail($e);
+        }
+
         // Log the exception
         $this->saveLog(
             $e,
@@ -221,6 +225,18 @@ class ExceptionHandlerService
                 'log_task' => 'default_exception_handling',
                 'log_status' => LogService::STATUS_ERROR,
             ]
+        ];
+    }
+
+    private function getErrorDetail(Throwable $th)
+    {
+        return [
+            'message' => $th->getMessage(),
+            'file' => $th->getFile(),
+            'line' => $th->getLine(),
+            'type' => class_basename($th),
+            'class' => get_class($th),
+            'trace' => $th->getTraceAsString()
         ];
     }
 }
