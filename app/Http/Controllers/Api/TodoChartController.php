@@ -15,16 +15,25 @@ class TodoChartController extends Controller
     {
         $filters = [];
 
-        $startDate = $request->query('start', null);
-        $endDate = $request->query('end', null);
+        $start = $request->query('start', null);
+        $end = $request->query('end', null);
+        $min = $request->query('min', null);
+        $max = $request->query('max', null);
+        $title = $request->query('title', null);
+        $assignee = $request->query('assignee', null);
+        $status = $request->query('status', null);
+        $priority = $request->query('priority', null);
 
-        if($startDate) {
-            $filters['start'] = $startDate;
-        }
-
-        if($endDate) {
-            $filters['end'] = $endDate;
-        }
+        $filters = [
+            'start' => $start,
+            'end' => $end,
+            'min' => $min,
+            'max' => $max,
+            'title' => $title,
+            'assignee' => $assignee,
+            'status' => $status,
+            'priority' => $priority
+        ];
 
         $type = $request->query('type');
         $type = strtolower(trim($type));
