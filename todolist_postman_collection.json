@@ -1,0 +1,400 @@
+{
+	"info": {
+		"_postman_id": "64ea7b74-3553-447d-bbd9-d4f6dd1d6021",
+		"name": "TodoList",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27401766",
+		"_collection_link": "https://commerce-7063.postman.co/workspace/everyone~40bf6562-8d25-4d7a-88cc-8f9f0cb1579b/collection/27401766-64ea7b74-3553-447d-bbd9-d4f6dd1d6021?action=share&source=collection_link&creator=27401766"
+	},
+	"item": [
+		{
+			"name": "Todos",
+			"item": [
+				{
+					"name": "Index",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos"
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "report",
+									"disabled": true
+								},
+								{
+									"key": "assignee",
+									"value": "mark",
+									"disabled": true
+								},
+								{
+									"key": "min",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "max",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "start",
+									"value": "2025-06-01",
+									"disabled": true
+								},
+								{
+									"key": "end",
+									"value": "2025-06-09",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "medium",
+									"disabled": true
+								},
+								{
+									"key": "paginate",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						},
+						"description": "## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"success\",\n    \"data\": {\n        \"todos\": [\n            {\n                \"id\": 3,\n                \"title\": \"Create weekly report\",\n                \"assignee\": \"john,mark\",\n                \"due_date\": \"2025-06-10 00:00:00\",\n                \"time_tracked\": 0,\n                \"status\": \"in_progress\",\n                \"priority\": \"medium\",\n                \"created_at\": \"2025-06-06T17:14:25.000000Z\",\n                \"updated_at\": \"2025-06-06T17:14:25.000000Z\"\n            },\n            {\n                \"id\": 2,\n                \"title\": \"Go to gym\",\n                \"assignee\": \"john\",\n                \"due_date\": \"2025-06-08 00:00:00\",\n                \"time_tracked\": 0,\n                \"status\": \"pending\",\n                \"priority\": \"low\",\n                \"created_at\": \"2025-06-06T17:13:43.000000Z\",\n                \"updated_at\": \"2025-06-06T17:13:43.000000Z\"\n            },\n            {\n                \"id\": 1,\n                \"title\": \"Meeting with client\",\n                \"assignee\": \"john\",\n                \"due_date\": \"2025-06-08 00:00:00\",\n                \"time_tracked\": 100,\n                \"status\": \"completed\",\n                \"priority\": \"high\",\n                \"created_at\": \"2025-06-06T17:10:48.000000Z\",\n                \"updated_at\": \"2025-06-06T17:12:07.000000Z\"\n            }\n        ]\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Store Todo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\" : \"Create weekly report\",\r\n    \"assignee\" : \"john,mark\",\r\n    \"status\" : \"in_progress\",\r\n    \"priority\" : \"medium\",\r\n    \"due_date\" : \"2025-06-10\",\r\n    \"time_tracked\" : 0\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos"
+							]
+						},
+						"description": "## request\n\n```\n{\n    \"title\" : \"Meeting with client\",\n    \"assignee\" : \"john\",\n    \"status\" : \"pending\",\n    \"priority\" : \"high\",\n    \"due_date\" : \"2025-06-08\",\n    \"time_tracked\" : 0\n}\n\n ```\n\n## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 201,\n    \"message\": \"success save todo\",\n    \"data\": {\n        \"todo\": {\n            \"title\": \"Meeting with client\",\n            \"assignee\": \"john\",\n            \"due_date\": \"2025-06-08 00:00:00\",\n            \"time_tracked\": 0,\n            \"status\": \"pending\",\n            \"priority\": \"high\",\n            \"updated_at\": \"2025-06-06T17:10:48.000000Z\",\n            \"created_at\": \"2025-06-06T17:10:48.000000Z\",\n            \"id\": 1\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Single",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos/1",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos",
+								"1"
+							]
+						},
+						"description": "## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"success get todo\",\n    \"data\": {\n        \"todo\": {\n            \"id\": 1,\n            \"title\": \"Meeting with client\",\n            \"assignee\": \"john\",\n            \"due_date\": \"2025-06-08 00:00:00\",\n            \"time_tracked\": 0,\n            \"status\": \"pending\",\n            \"priority\": \"high\",\n            \"created_at\": \"2025-06-06T17:10:48.000000Z\",\n            \"updated_at\": \"2025-06-06T17:10:48.000000Z\"\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"time_tracked\" : 100,\r\n    \"status\" : \"completed\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos/1",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos",
+								"1"
+							]
+						},
+						"description": "## request\n\n```\n{\n    \"title\" : \"Meeting with client\",\n    \"assignee\" : \"john\",\n    \"status\" : \"completed\",\n    \"priority\" : \"high\",\n    \"due_date\" : \"2025-06-08\",\n    \"time_tracked\" : 100\n}\n\n ```\n\n## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"success save todo\",\n    \"data\": {\n        \"todo\": {\n            \"id\": 1,\n            \"title\": \"Meeting with client\",\n            \"assignee\": \"john\",\n            \"due_date\": \"2025-06-08 00:00:00\",\n            \"time_tracked\": 100,\n            \"status\": \"completed\",\n            \"priority\": \"high\",\n            \"created_at\": \"2025-06-06T17:10:48.000000Z\",\n            \"updated_at\": \"2025-06-06T17:12:07.000000Z\"\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos/1",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Chart",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\" : \"sleeping\",\r\n    \"assignee\" : \"dedi\",\r\n    \"status\" : \"pending\",\r\n    \"priority\" : \"high\",\r\n    \"due_date\" : \"2025-06-08\"\r\n}"
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos/chart",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos",
+								"chart"
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "sleeping",
+									"disabled": true
+								},
+								{
+									"key": "assignee",
+									"value": "dedi",
+									"disabled": true
+								},
+								{
+									"key": "min",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "max",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "start",
+									"value": "2025-06-01",
+									"disabled": true
+								},
+								{
+									"key": "end",
+									"value": "2025-06-09",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "medium",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "status",
+									"disabled": true
+								}
+							]
+						},
+						"description": "## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"success get chart\",\n    \"data\": {\n        \"status_summary\": {\n            \"pending\": 1,\n            \"open\": 0,\n            \"in_progress\": 1,\n            \"completed\": 1\n        },\n        \"priority_summary\": {\n            \"low\": 1,\n            \"medium\": 1,\n            \"high\": 1\n        },\n        \"assignee_summary\": {\n            \"john\": {\n                \"total_todos\": 3,\n                \"total_pending_todos\": 1,\n                \"total_timetracked_completed_todos\": 100\n            },\n            \"mark\": {\n                \"total_todos\": 1,\n                \"total_pending_todos\": 0,\n                \"total_timetracked_completed_todos\": 0\n            }\n        }\n    }\n}\n\n ```"
+					},
+					"response": []
+				},
+				{
+					"name": "Export",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\" : \"sleeping\",\r\n    \"assignee\" : \"dedi\",\r\n    \"status\" : \"pending\",\r\n    \"priority\" : \"high\",\r\n    \"due_date\" : \"2025-06-08\"\r\n}"
+						},
+						"url": {
+							"raw": "{{host}}:{{port}}/api/todos/export",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"todos",
+								"export"
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "sleeping",
+									"disabled": true
+								},
+								{
+									"key": "assignee",
+									"value": "dedi",
+									"disabled": true
+								},
+								{
+									"key": "min",
+									"value": "0",
+									"disabled": true
+								},
+								{
+									"key": "max",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "start",
+									"value": "2025-06-01",
+									"disabled": true
+								},
+								{
+									"key": "end",
+									"value": "2025-06-09",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "priority",
+									"value": "medium",
+									"disabled": true
+								}
+							]
+						},
+						"description": "## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"success export\",\n    \"data\": {\n        \"total_row\": 3,\n        \"total_time_tracked\": 100,\n        \"filename\": \"todo_export_20250606_171718.xlsx\",\n        \"url\": \"http://127.0.0.1:8000/api/todos/download/todo_export_20250606_171718.xlsx\"\n    }\n}\n ```"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "API Index",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}:{{port}}/api",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api"
+					]
+				},
+				"description": "## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"success get index\",\n    \"data\": {\n        \"service\": \"todo-list\",\n        \"version\": \"0.0.1\"\n    }\n}\n\n ```"
+			},
+			"response": []
+		},
+		{
+			"name": "Logs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}:{{port}}/api/logs?limit=1&sort=desc&date=2025-06-04",
+					"host": [
+						"{{host}}"
+					],
+					"port": "{{port}}",
+					"path": [
+						"api",
+						"logs"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "1"
+						},
+						{
+							"key": "sort",
+							"value": "desc"
+						},
+						{
+							"key": "date",
+							"value": "2025-06-04"
+						}
+					]
+				},
+				"description": "## request\n\nquery params\n\n- limit : get X lines logs from the latest (default 10)\n    \n- sort : change logs order in response\n    \n- date: get logs by date (default today)\n    \n\n## response\n\n```\n{\n    \"status\": \"success\",\n    \"code\": 200,\n    \"message\": \"Success get logs for date 2025-06-04\",\n    \"data\": {\n        \"available_filters\": {\n            \"date\": \"get logs by date (yyyy-mm-dd). default: today\",\n            \"limit\": \"limit log being parsed from the last line. default: 10\",\n            \"sort\": \"sorting log response. default: asc\"\n        },\n        \"logs\": [\n            {\n                \"message\": \"GET a - 404\",\n                \"context\": {\n                    \"meta\": {\n                        \"status\": \"fail\",\n                        \"level\": \"warning\",\n                        \"code\": 404,\n                        \"task\": \"web_request_cycle\",\n                        \"message\": \"GET a - 404\",\n                        \"duration_ms\": 9\n                    },\n                    \"request\": {\n                        \"method\": \"GET\",\n                        \"url\": \"http://127.0.0.1:8000/a\",\n                        \"ip\": \"127.0.0.1\",\n                        \"agent\": {\n                            \"browser\": \"Chrome\",\n                            \"browser_version\": \"136.0.0.0\",\n                            \"platform\": \"Windows\",\n                            \"platform_version\": \"10.0\",\n                            \"device\": \"WebKit\",\n                            \"is_mobile\": false,\n                            \"is_desktop\": true,\n                            \"user_agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36\"\n                        }\n                    },\n                    \"response\": {\n                        \"data\": {\n                            \"type\": \"html\",\n                            \"size\": 6603,\n                            \"title\": \"Not Found\"\n                        }\n                    },\n                    \"timestamp\": {\n                        \"utc\": \"2025-06-04T16:49:53Z\",\n                        \"local\": \"2025-06-04T23:49:53+07:00\"\n                    },\n                    \"app_version\": \"0.0.1\",\n                    \"app_env\": \"local\",\n                    \"app_service\": \"todo-list\"\n                },\n                \"level\": 300,\n                \"level_name\": \"WARNING\",\n                \"channel\": \"local\",\n                \"datetime\": \"2025-06-04T16:49:53.151894+00:00\",\n                \"extra\": []\n            }\n        ]\n    }\n}\n ```"
+			},
+			"response": []
+		}
+	]
+}
