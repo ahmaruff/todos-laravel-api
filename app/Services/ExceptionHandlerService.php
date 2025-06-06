@@ -38,6 +38,17 @@ class ExceptionHandlerService
         if (isset($this->exceptionMap[$exceptionClass])) {
             return $this->renderMappedException($e, $this->exceptionMap[$exceptionClass]);
         }
+
+        $default = [
+            'status' => LogService::STATUS_ERROR,
+            'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            'message' => $e->getMessage(),
+            'log_level' => LogService::LEVEL_ERROR,
+            'log_task' => 'default_exception_handling',
+            'log_status' => LogService::STATUS_ERROR,
+        ];
+
+        return $this->renderMappedException($e, $default);
     }
 
     private function shouldReturnJsonResponse(): bool
