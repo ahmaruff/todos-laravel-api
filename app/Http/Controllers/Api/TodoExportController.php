@@ -18,6 +18,23 @@ class TodoExportController extends Controller
     {
         $start = $request->query('start', null);
         $end = $request->query('end', null);
+        $min = $request->query('min', null);
+        $max = $request->query('max', null);
+        $title = $request->query('title', null);
+        $assignee = $request->query('assignee', null);
+        $status = $request->query('status', null);
+        $priority = $request->query('priority', null);
+
+        $filters = [
+            'start' => $start,
+            'end' => $end,
+            'min' => $min,
+            'max' => $max,
+            'title' => $title,
+            'assignee' => $assignee,
+            'status' => $status,
+            'priority' => $priority
+        ];
 
         $filters = [
             'start' => $start,
