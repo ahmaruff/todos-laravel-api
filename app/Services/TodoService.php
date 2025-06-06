@@ -317,17 +317,59 @@ class TodoService
         $allStatuses = collect(Todo::$statusList)
             ->mapWithKeys(fn($status) => [$status => 0]);
 
-        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
-        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
+        $start = $this->convertDate($filters['start'] ?? null, 'start');
+        $end =  $this->convertDate($filters['end']  ?? null, 'end');
 
         $query = Todo::query();
 
-        if($startDate) {
-            $query->where('due_date', '>=', $startDate);
+        if (!empty($filters['title'])) {
+            $query->where('title', 'like', '%' . $filters['title'] . '%');
         }
 
-        if($endDate) {
-            $query->where('due_date', '<=', $endDate);
+        if ($start && $end) {
+            $query->whereBetween('due_date', [$start, $end]);
+        } else {
+            if ($start) {
+                $query->where('due_date', '>=', $start);
+            }
+            if ($end) {
+                $query->where('due_date', '<=', $end);
+            }
+        }
+
+        if (!empty($filters['min'])) {
+            $query->where('time_tracked', '>=', $filters['min']);
+        }
+
+        if (!empty($filters['max'])) {
+            $query->where('time_tracked', '<=', $filters['max']);
+        }
+
+        if (!empty($filters['assignee'])) {
+            $assignees = array_map('trim', explode(',', $filters['assignee']));
+            $query->where(function ($q) use ($assignees) {
+                foreach ($assignees as $assignee) {
+                    $q->orWhere(function ($q2) use ($assignee) {
+                        $q2->where('assignee', $assignee)
+                        ->orWhere('assignee', 'LIKE', "$assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee,%");
+                    });
+                }
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $status = trim($filters['status']);
+            $query->where('status', $status);
+        }
+
+        // Filter by priority
+        if (!empty($filters['priority'])) {
+            $priority = trim($filters['priority']);
+            $query->where('priority', $priority);
         }
 
         $counts = $query->select('status', DB::raw('count(*) as total'))
@@ -344,17 +386,59 @@ class TodoService
         $allPriorities = collect(Todo::$priorityList)
             ->mapWithKeys(fn($priority) => [$priority => 0]);
 
-        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
-        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
+        $start = $this->convertDate($filters['start'] ?? null, 'start');
+        $end =  $this->convertDate($filters['end']  ?? null, 'end');
 
         $query = Todo::query();
 
-        if($startDate) {
-            $query->where('due_date', '>=', $startDate);
+        if (!empty($filters['title'])) {
+            $query->where('title', 'like', '%' . $filters['title'] . '%');
         }
 
-        if($endDate) {
-            $query->where('due_date', '<=', $endDate);
+        if ($start && $end) {
+            $query->whereBetween('due_date', [$start, $end]);
+        } else {
+            if ($start) {
+                $query->where('due_date', '>=', $start);
+            }
+            if ($end) {
+                $query->where('due_date', '<=', $end);
+            }
+        }
+
+        if (!empty($filters['min'])) {
+            $query->where('time_tracked', '>=', $filters['min']);
+        }
+
+        if (!empty($filters['max'])) {
+            $query->where('time_tracked', '<=', $filters['max']);
+        }
+
+        if (!empty($filters['assignee'])) {
+            $assignees = array_map('trim', explode(',', $filters['assignee']));
+            $query->where(function ($q) use ($assignees) {
+                foreach ($assignees as $assignee) {
+                    $q->orWhere(function ($q2) use ($assignee) {
+                        $q2->where('assignee', $assignee)
+                        ->orWhere('assignee', 'LIKE', "$assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee,%");
+                    });
+                }
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $status = trim($filters['status']);
+            $query->where('status', $status);
+        }
+
+        // Filter by priority
+        if (!empty($filters['priority'])) {
+            $priority = trim($filters['priority']);
+            $query->where('priority', $priority);
         }
 
         $counts = $query->select('priority', DB::raw('count(*) as total'))
@@ -368,17 +452,59 @@ class TodoService
 
     public function assigneeChart(array $filters)
     {
-        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
-        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
+        $start = $this->convertDate($filters['start'] ?? null, 'start');
+        $end =  $this->convertDate($filters['end']  ?? null, 'end');
 
         $query = Todo::query();
 
-        if($startDate) {
-            $query->where('due_date', '>=', $startDate);
+        if (!empty($filters['title'])) {
+            $query->where('title', 'like', '%' . $filters['title'] . '%');
         }
 
-        if($endDate) {
-            $query->where('due_date', '<=', $endDate);
+        if ($start && $end) {
+            $query->whereBetween('due_date', [$start, $end]);
+        } else {
+            if ($start) {
+                $query->where('due_date', '>=', $start);
+            }
+            if ($end) {
+                $query->where('due_date', '<=', $end);
+            }
+        }
+
+        if (!empty($filters['min'])) {
+            $query->where('time_tracked', '>=', $filters['min']);
+        }
+
+        if (!empty($filters['max'])) {
+            $query->where('time_tracked', '<=', $filters['max']);
+        }
+
+        if (!empty($filters['assignee'])) {
+            $assignees = array_map('trim', explode(',', $filters['assignee']));
+            $query->where(function ($q) use ($assignees) {
+                foreach ($assignees as $assignee) {
+                    $q->orWhere(function ($q2) use ($assignee) {
+                        $q2->where('assignee', $assignee)
+                        ->orWhere('assignee', 'LIKE', "$assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee")
+                        ->orWhere('assignee', 'LIKE', "%, $assignee,%")
+                        ->orWhere('assignee', 'LIKE', "%,$assignee,%");
+                    });
+                }
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $status = trim($filters['status']);
+            $query->where('status', $status);
+        }
+
+        // Filter by priority
+        if (!empty($filters['priority'])) {
+            $priority = trim($filters['priority']);
+            $query->where('priority', $priority);
         }
 
         $todos = Todo::select('assignee', 'status', 'time_tracked')->get();
