@@ -123,4 +123,24 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Application Service
+    |--------------------------------------------------------------------------
+    |
+    | This value defines the service name that your application provides.
+    | It's useful for logging and monitoring purposes.
+    |
+    */
+    'service' => env('APP_SERVICE', 'todo-list'),  // Add this line
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | This value defines the version of your application.
+    |
+    */
+    'version' => env('APP_VERSION', '0.0.1'),
 ];
