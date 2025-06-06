@@ -6,12 +6,10 @@ use App\Models\Todo;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use OpenSpout\Common\Entity\Cell;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,11 +29,11 @@ class TodoService
         $end = null;
 
         if (!empty($filters['start'])) {
-            $start = Carbon::parse($filters['start'])->startOfDay()->utc();
+            $start = $this->convertDate($filters['start'], 'start');
         }
 
         if (!empty($filters['end'])) {
-            $end = Carbon::parse($filters['end'])->endOfDay()->utc();
+            $end = $this->convertDate($filters['end'], 'end');
         }
 
         // === start query ===
@@ -225,11 +223,11 @@ class TodoService
         $end = null;
 
         if (!empty($filters['start'])) {
-            $start = Carbon::parse($filters['start'])->startOfDay()->utc();
+            $start = $this->convertDate($filters['start'], 'start');
         }
 
         if (!empty($filters['end'])) {
-            $end = Carbon::parse($filters['end'])->endOfDay()->utc();
+            $end = $this->convertDate($filters['end'], 'end');
         }
 
         // === start query ===
@@ -319,6 +317,106 @@ class TodoService
         ];
     }
 
+    public function statusChart(array $filters)
+    {
+        $allStatuses = collect(Todo::$statusList)
+            ->mapWithKeys(fn($status) => [$status => 0]);
+
+        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
+        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
+
+        $query = Todo::query();
+
+        if($startDate) {
+            $query->where('due_date', '>=', $startDate);
+        }
+
+        if($endDate) {
+            $query->where('due_date', '<=', $endDate);
+        }
+
+        $counts = $query->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statusSummary = $allStatuses->merge($counts);
+
+        return $statusSummary;
+    }
+
+    public function priorityChart(array $filters)
+    {
+        $allPriorities = collect(Todo::$priorityList)
+            ->mapWithKeys(fn($priority) => [$priority => 0]);
+
+        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
+        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
+
+        $query = Todo::query();
+
+        if($startDate) {
+            $query->where('due_date', '>=', $startDate);
+        }
+
+        if($endDate) {
+            $query->where('due_date', '<=', $endDate);
+        }
+
+        $counts = $query->select('priority', DB::raw('count(*) as total'))
+            ->groupBy('priority')
+            ->pluck('total', 'priority');
+
+        $prioritySummary = $allPriorities->merge($counts);
+
+        return $prioritySummary;
+    }
+
+    public function assigneeChart(array $filters)
+    {
+        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
+        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
+
+        $query = Todo::query();
+
+        if($startDate) {
+            $query->where('due_date', '>=', $startDate);
+        }
+
+        if($endDate) {
+            $query->where('due_date', '<=', $endDate);
+        }
+
+        $todos = Todo::select('assignee', 'status', 'time_tracked')->get();
+
+        $summary = [];
+
+        foreach ($todos as $todo) {
+            $assignees = array_map('trim', explode(',', $todo->assignee));
+
+            foreach ($assignees as $name) {
+                if (!isset($summary[$name])) {
+                    $summary[$name] = [
+                        'total_todos' => 0,
+                        'total_pending_todos' => 0,
+                        'total_timetracked_completed_todos' => 0,
+                    ];
+                }
+
+                $summary[$name]['total_todos']++;
+
+                if ($todo->status === Todo::STATUS_PENDING) {
+                    $summary[$name]['total_pending_todos']++;
+                }
+
+                if ($todo->status === Todo::STATUS_COMPLETED && $todo->time_tracked > 0) {
+                    $summary[$name]['total_timetracked_completed_todos'] += (int) $todo->time_tracked;
+                }
+            }
+        }
+
+        return $summary;
+    }
+
     private function handleDefaultValue($data)
     {
         if(!isset($data['time_tracked'])) {
@@ -330,5 +428,30 @@ class TodoService
         }
 
         return $data;
+    }
+
+    private function convertDate($date, string $type = 'as_is')
+    {
+        $type = strtolower($type);
+        $typeList = ['start', 'end', 'as_is'];
+
+        if (!in_array($type, $typeList)) {
+            return null;
+        }
+
+        if (empty($date)) {
+            return null;
+        }
+
+        try {
+            $carbon = Carbon::parse($date)->utc();
+            return match ($type) {
+                'start' => $carbon->startOfDay(),
+                'end' => $carbon->endOfDay(),
+                default => $carbon,
+            };
+        } catch (\Throwable $th) {
+            return null;
+        }
     }
 }
