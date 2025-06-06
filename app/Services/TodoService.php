@@ -29,11 +29,11 @@ class TodoService
         $end = null;
 
         if (!empty($filters['start'])) {
-            $start = Carbon::parse($filters['start'])->startOfDay()->utc();
+            $start = $this->convertDate($filters['start'], 'start');
         }
 
         if (!empty($filters['end'])) {
-            $end = Carbon::parse($filters['end'])->endOfDay()->utc();
+            $end = $this->convertDate($filters['end'], 'end');
         }
 
         // === start query ===
@@ -223,11 +223,11 @@ class TodoService
         $end = null;
 
         if (!empty($filters['start'])) {
-            $start = Carbon::parse($filters['start'])->startOfDay()->utc();
+            $start = $this->convertDate($filters['start'], 'start');
         }
 
         if (!empty($filters['end'])) {
-            $end = Carbon::parse($filters['end'])->endOfDay()->utc();
+            $end = $this->convertDate($filters['end'], 'end');
         }
 
         // === start query ===
@@ -322,8 +322,8 @@ class TodoService
         $allStatuses = collect(Todo::$statusList)
             ->mapWithKeys(fn($status) => [$status => 0]);
 
-        $startDate = $this->convertDate($filters['start_date'] ?? null, 'start');
-        $endDate =  $this->convertDate($filters['end_date']  ?? null, 'end');
+        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
+        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
 
         $query = Todo::query();
 
@@ -349,8 +349,8 @@ class TodoService
         $allPriorities = collect(Todo::$priorityList)
             ->mapWithKeys(fn($priority) => [$priority => 0]);
 
-        $startDate = $this->convertDate($filters['start_date']  ?? null, 'start');
-        $endDate =  $this->convertDate($filters['end_date']  ?? null, 'end');
+        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
+        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
 
         $query = Todo::query();
 
@@ -373,8 +373,8 @@ class TodoService
 
     public function assigneeChart(array $filters)
     {
-        $startDate = $this->convertDate($filters['start_date']  ?? null, 'start');
-        $endDate =  $this->convertDate($filters['end_date']  ?? null, 'end');
+        $startDate = $this->convertDate($filters['start'] ?? null, 'start');
+        $endDate =  $this->convertDate($filters['end']  ?? null, 'end');
 
         $query = Todo::query();
 

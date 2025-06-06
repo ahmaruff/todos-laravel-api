@@ -19,14 +19,10 @@ class TodoExportController extends Controller
         $start = $request->query('start', null);
         $end = $request->query('end', null);
 
-        $filters = [];
-        if ($start) {
-            $filters['start'] = Carbon::parse($start)->startOfDay()->utc();
-        }
-
-        if ($end) {
-            $filters['end'] = Carbon::parse($end)->endOfDay()->utc();
-        }
+        $filters = [
+            'start' => $start,
+            'end' => $end,
+        ];
 
         $result = $this->todoService->export($filters);
         $filename = $result['filename'];

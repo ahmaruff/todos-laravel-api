@@ -15,15 +15,15 @@ class TodoChartController extends Controller
     {
         $filters = [];
 
-        $startDate = $request->query('start_date', null);
-        $endDate = $request->query('end_date', null);
+        $startDate = $request->query('start', null);
+        $endDate = $request->query('end', null);
 
         if($startDate) {
-            $filters['start_date'] = $startDate;
+            $filters['start'] = $startDate;
         }
 
         if($endDate) {
-            $filters['end_date'] = $endDate;
+            $filters['end'] = $endDate;
         }
 
         $type = $request->query('type');
