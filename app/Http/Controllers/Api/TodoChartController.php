@@ -28,24 +28,29 @@ class TodoChartController extends Controller
 
         $type = $request->query('type');
         $type = strtolower(trim($type));
-        $data  = [];
-        switch ($type) {
-            case 'status':
-                $data['status_summary'] = $this->todoService->statusChart($filters);
-                break;
-            case 'priority':
-                $data['priority_summary'] = $this->todoService->priorityChart($filters);
-                break;
-            case 'assignee':
-                $data['assignee_summary'] = $this->todoService->assigneeChart($filters);
-                break;
-            default:
-                $data['status_summary'] = $this->todoService->statusChart($filters);
-                $data['priority_summary'] = $this->todoService->priorityChart($filters);
-                $data['assignee_summary'] = $this->todoService->assigneeChart($filters);
-                break;
-        }
 
-        return ResponseJsonCommand::responseSuccess("success get chart", $data);
+        try {
+            $data  = [];
+            switch ($type) {
+                case 'status':
+                    $data['status_summary'] = $this->todoService->statusChart($filters);
+                    break;
+                case 'priority':
+                    $data['priority_summary'] = $this->todoService->priorityChart($filters);
+                    break;
+                case 'assignee':
+                    $data['assignee_summary'] = $this->todoService->assigneeChart($filters);
+                    break;
+                default:
+                    $data['status_summary'] = $this->todoService->statusChart($filters);
+                    $data['priority_summary'] = $this->todoService->priorityChart($filters);
+                    $data['assignee_summary'] = $this->todoService->assigneeChart($filters);
+                    break;
+            }
+
+            return ResponseJsonCommand::responseSuccess("success get chart", $data);
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 }
