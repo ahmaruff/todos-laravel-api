@@ -409,7 +409,7 @@ class TodoService
                 }
 
                 if ($todo->status === Todo::STATUS_COMPLETED && $todo->time_tracked > 0) {
-                    $summary[$name]['total_timetracked_completed_todos']++;
+                    $summary[$name]['total_timetracked_completed_todos'] += (int) $todo->time_tracked;
                 }
             }
         }
