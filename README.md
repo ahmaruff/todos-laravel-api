@@ -87,10 +87,12 @@ Organizing all endpoints under the /api/todos namespace adheres to RESTful desig
 | Create Todo Item | POST `/api/todos` |
 | Get Todos | GET `/api/todos` with filters |
 | Get Todo Item | GET `/api/todos/{id}` |
+| Update Todo Item | PUT `/api/todos/{id}` |
+| Delete Todo Item | DELETE `/api/todos/{id}` |
 | Export Todos to Excel | GET `/api/todos/export` with filters |
-| Chart Data Endpoint | GET `/api/todos/chart?type=[status\|priority\|assignee]` |
-| Logging Support | Get `/api/logs` |
-| OpenAPI/Swagger Support | Get `/api/documentation` |
+| Chart Data Endpoint | GET `/api/todos/chart?type=[status\|priority\|assignee]` with filters |
+| Logging Support | GET `/api/logs` |
+| OpenAPI/Swagger Support | GET `/api/documentation` |
 | Request Validation | Form requests and centralized error handling |
 | Filter Support | Query parameters for filtering todos |
 
